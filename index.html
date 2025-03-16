@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to My Website - Est. 2000</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 onclick="changeColor(this)">Welcome to My Website!</h1>
+            <div class="under-construction">
+                <img src="https://web.archive.org/web/20091027005903/http://www.geocities.com/hk/Horizons/1121/const_an.gif" alt="Under Construction">
+                <span>Site Under Construction</span>
+            </div>
+            <marquee scrollamount="3" behavior="alternate">★ Thank you for visiting my homepage! ★ Please sign my guestbook! ★ Last updated: 05/15/2000 ★</marquee>
+        </header>
+        
+        <nav>
+            <ul>
+                <li><a href="#" class="active" onmouseover="showDate()">Home</a></li>
+                <li><a href="#" onmouseover="showDate()">About Me</a></li>
+                <li><a href="#" onmouseover="showDate()">My Photos</a></li>
+                <li><a href="#" onmouseover="showDate()">Links</a></li>
+                <li><a href="#" onclick="return openGuestbook()" onmouseover="showDate()">Guestbook</a></li>
+            </ul>
+        </nav>
+        
+        <main>
+            <div class="content">
+                <h2>Welcome to my homepage!</h2>
+                <p>Hello and welcome to my little corner of the <span onclick="changeColor(this)">World Wide Web</span>! This site is best viewed in 800x600 resolution.</p>
+                <p>I created this page to share my interests and connect with friends. Feel free to sign my guestbook!</p>
+                
+                <div class="midi-player">
+                    <p>♫ Background Music: "My Heart Will Go On" ♫</p>
+                    <div class="controls">
+                        <button disabled>Play</button>
+                        <button disabled>Stop</button>
+                    </div>
+                </div>
+                
+                <div class="counter">
+                    <p>You are visitor number:</p>
+                    <div class="visitor-count" onclick="incrementCounter()">00001</div>
+                </div>
+                
+                <!-- Hidden Easter egg - clicking this will trigger the secret message -->
+                <div class="easter-egg" onclick="showSecret()">.</div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="about-me">
+                    <h3>About Me</h3>
+                    <img src="https://web.archive.org/web/20090830094535/http://www.geocities.com/Hollywood/Hills/8521/images/myhome.gif" alt="My Home">
+                    <p>Name: John Doe</p>
+                    <p>Age: 25</p>
+                    <p>Location: Cyberspace</p>
+                    <p>Email: <a href="mailto:webmaster@example.com">webmaster@example.com</a></p>
+                </div>
+                
+                <div class="updates">
+                    <h3>Latest Updates</h3>
+                    <p><span class="date">05/15/2000</span> - Added new links page!</p>
+                    <p><span class="date">04/22/2000</span> - Fixed broken images</p>
+                    <p><span class="date">03/10/2000</span> - Site launched!</p>
+                </div>
+                
+                <div class="awards">
+                    <h3>My Awards</h3>
+                    <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/award.gif" alt="Website Award">
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>© 2000 My Awesome Website. All rights reserved.</p>
+            <div class="badges">
+                <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/ie.gif" alt="Best viewed with Internet Explorer">
+                <img src="https://web.archive.org/web/20091026152350/http://www.geocities.com/Hollywood/Hills/8521/images/netscape.gif" alt="Netscape Now!">
+            </div>
+            <p class="webring">
+                <a href="#">« Previous</a> | 
+                <a href="#">Join Our Webring</a> | 
+                <a href="#">Next »</a>
+            </p>
+            <div class="hit-counter">
+                <img src="https://web.archive.org/web/20090830094535/http://www.geocities.com/Hollywood/Hills/8521/images/counter.gif" alt="Hit Counter">
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Hidden comment with "secret" message - another classic early 2000s website feature -->
+    <!-- 
+    ***************************************
+    * Congratulations on finding this     *
+    * secret message! You must be viewing *
+    * my page's source code!              *
+    *                                     *
+    * Email me at webmaster@example.com   *
+    * to claim your prize!                *
+    ***************************************
+    -->
+</body>
+</html> 

@@ -1,0 +1,297 @@
+/* Early 2000s Website Style */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Comic Sans MS", "Times New Roman", Arial, sans-serif;
+    background-color: #000080; /* Navy blue background */
+    background-image: url('https://web.archive.org/web/20090830094535/http://www.geocities.com/Hollywood/Hills/8521/images/stars.gif');
+    color: #FFFFFF;
+    height: 100vh;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.container {
+    width: 800px;
+    height: 600px; /* Fixed height for no scrolling */
+    margin: 0 auto;
+    border: 5px solid #FF00FF; /* Hot pink border */
+    background-color: #000000;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px #00FFFF; /* Cyan glow effect */
+}
+
+header {
+    background-color: #000000;
+    text-align: center;
+    padding: 10px;
+    border-bottom: 3px solid #FFFF00; /* Yellow border */
+}
+
+h1 {
+    font-size: 28px;
+    color: #FF00FF; /* Hot pink text */
+    text-shadow: 2px 2px #00FFFF; /* Cyan text shadow */
+    margin-bottom: 5px;
+    cursor: pointer; /* Show it's clickable */
+}
+
+.under-construction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0;
+}
+
+.under-construction img {
+    height: 20px;
+    margin-right: 10px;
+}
+
+.under-construction span {
+    color: #FFFF00; /* Yellow text */
+    font-weight: bold;
+    font-size: 14px;
+    animation: blink 1s infinite; /* Blinking text effect */
+}
+
+marquee {
+    background-color: #000066;
+    color: #FFFF00;
+    padding: 3px;
+    font-size: 12px;
+    margin-top: 5px;
+    border: 1px dashed #00FFFF;
+}
+
+nav {
+    background-color: #0000FF; /* Blue background */
+    padding: 5px;
+}
+
+nav ul {
+    display: flex;
+    list-style-type: none;
+    justify-content: center;
+}
+
+nav li {
+    margin: 0 5px;
+}
+
+nav a {
+    color: #FFFFFF;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 3px 8px;
+    border: 1px solid #00FFFF; /* Cyan border */
+    background-color: #000080; /* Navy blue */
+    display: inline-block;
+}
+
+nav a:hover, nav a.active {
+    background-color: #FF00FF; /* Hot pink */
+    color: #FFFFFF;
+}
+
+main {
+    display: flex;
+    height: 400px; /* Adjusted height to accommodate new elements */
+    background-color: #000000;
+}
+
+.content {
+    flex: 2;
+    padding: 10px;
+    border-right: 2px dashed #00FFFF; /* Cyan dashed border */
+    overflow-y: auto; /* Allow scrolling within content area if needed */
+    position: relative; /* For positioning the Easter egg */
+}
+
+h2 {
+    color: #00FFFF; /* Cyan heading */
+    margin-bottom: 10px;
+    text-decoration: underline;
+}
+
+p {
+    margin-bottom: 10px;
+    line-height: 1.3;
+    font-size: 14px;
+}
+
+span[onclick] {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #00FFFF;
+}
+
+.midi-player {
+    margin: 15px 0;
+    border: 1px solid #FFFF00;
+    padding: 5px;
+    background-color: #000066;
+    text-align: center;
+}
+
+.controls {
+    margin-top: 5px;
+}
+
+.controls button {
+    background-color: #000080;
+    color: #FFFFFF;
+    border: 1px solid #00FFFF;
+    padding: 2px 8px;
+    margin: 0 5px;
+    cursor: not-allowed;
+}
+
+.counter {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.visitor-count {
+    display: inline-block;
+    background-color: #000000;
+    color: #FF0000; /* Red text */
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    padding: 3px 8px;
+    border: 1px solid #FFFFFF;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: transform 0.2s, color 0.2s;
+}
+
+/* Easter egg styling - hidden but clickable */
+.easter-egg {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 5px;
+    height: 5px;
+    background-color: transparent;
+    border: 1px solid #000000;
+    cursor: pointer;
+    opacity: 0.1;
+}
+
+.easter-egg:hover {
+    opacity: 0.5;
+    border-color: #FF00FF;
+}
+
+.sidebar {
+    flex: 1;
+    padding: 10px;
+    background-color: #000033; /* Darker blue */
+    overflow-y: auto; /* Allow scrolling within sidebar if needed */
+}
+
+.about-me {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.about-me img {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #FFFF00; /* Yellow border */
+    margin: 5px 0;
+}
+
+h3 {
+    color: #FFFF00; /* Yellow heading */
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.about-me p {
+    text-align: left;
+    margin: 3px 0;
+    font-size: 12px;
+}
+
+.updates {
+    border: 1px solid #00FFFF; /* Cyan border */
+    padding: 5px;
+    background-color: #000066; /* Slightly lighter blue */
+    margin-bottom: 15px;
+}
+
+.date {
+    color: #00FFFF; /* Cyan text */
+    font-weight: bold;
+}
+
+.awards {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.awards img {
+    margin-top: 5px;
+    border: 1px solid #FFFF00;
+    padding: 3px;
+    background-color: #000000;
+}
+
+footer {
+    background-color: #000033; /* Darker blue */
+    padding: 5px;
+    text-align: center;
+    border-top: 3px solid #FFFF00; /* Yellow border */
+    font-size: 12px;
+}
+
+.badges {
+    margin: 5px 0;
+}
+
+.badges img {
+    height: 30px;
+    margin: 0 5px;
+}
+
+.webring {
+    margin: 5px 0;
+}
+
+.webring a {
+    color: #00FFFF; /* Cyan links */
+    text-decoration: none;
+}
+
+.webring a:hover {
+    color: #FF00FF; /* Hot pink on hover */
+    text-decoration: underline;
+}
+
+.hit-counter {
+    margin-top: 5px;
+}
+
+.hit-counter img {
+    height: 20px;
+}
+
+/* Secret message styling */
+.secret-message {
+    font-family: "Courier New", monospace;
+    text-align: center;
+    animation: blink 0.5s infinite;
+}
+
+/* Blinking text animation */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+} 
