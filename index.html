@@ -1,107 +1,315 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to My Website - Est. 2000</title>
+    <title>Barang Bekas Kita - Marketplace Barang Preloved Indonesia</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 onclick="changeColor(this)">Welcome to My Website!</h1>
-            <div class="under-construction">
-                <img src="https://web.archive.org/web/20091027005903/http://www.geocities.com/hk/Horizons/1121/const_an.gif" alt="Under Construction">
-                <span>Site Under Construction</span>
-            </div>
-            <marquee scrollamount="3" behavior="alternate">★ Thank you for visiting my homepage! ★ Please sign my guestbook! ★ Last updated: 05/15/2000 ★</marquee>
+            <h1 onclick="changeColor(this)">🛒 Barang Bekas Kita 🛒</h1>
+            <p class="tagline">Marketplace Barang Preloved #1 di Indonesia!</p>
+            <marquee scrollamount="3" behavior="alternate">★ Beli & Jual Barang Bekas dengan Mudah! ★ Harga Murah, Kualitas Terjamin! ★ Gabung Sekarang GRATIS! ★</marquee>
         </header>
-        
+
         <nav>
             <ul>
-                <li><a href="#" class="active" onmouseover="showDate()">Home</a></li>
-                <li><a href="#" onmouseover="showDate()">About Me</a></li>
-                <li><a href="#" onmouseover="showDate()">My Photos</a></li>
-                <li><a href="#" onmouseover="showDate()">Links</a></li>
-                <li><a href="#" onclick="return openGuestbook()" onmouseover="showDate()">Guestbook</a></li>
+                <li><a href="#" class="active" onclick="showSection('home')">🏠 Beranda</a></li>
+                <li><a href="#" onclick="showSection('browse')">📦 Jelajah</a></li>
+                <li><a href="#" onclick="showSection('sell')">💰 Jual Barang</a></li>
+                <li><a href="#" onclick="showSection('about')">ℹ️ Tentang</a></li>
+                <li><a href="#" onclick="showSection('contact')">📧 Kontak</a></li>
             </ul>
         </nav>
-        
+
         <main>
-            <div class="content">
-                <h2>Welcome to my homepage!</h2>
-                <p>Hello and welcome to my little corner of the <span onclick="changeColor(this)">World Wide Web</span>! This site is best viewed in 800x600 resolution.</p>
-                <p>I created this page to share my interests and connect with friends. Feel free to sign my guestbook!</p>
-                
-                <div class="midi-player">
-                    <p>♫ Background Music: "My Heart Will Go On" ♫</p>
-                    <div class="controls">
-                        <button disabled>Play</button>
-                        <button disabled>Stop</button>
+            <!-- HOME SECTION -->
+            <div id="home-section" class="section active">
+                <div class="content">
+                    <div class="search-box">
+                        <h2>🔍 Cari Barang Impian Anda!</h2>
+                        <input type="text" id="search-input" placeholder="Cari barang... (contoh: laptop, sepatu, handphone)">
+                        <button onclick="searchItems()">Cari Sekarang!</button>
+                    </div>
+
+                    <div class="categories">
+                        <h2>📂 Kategori Populer</h2>
+                        <div class="category-grid">
+                            <div class="category-item" onclick="filterByCategory('elektronik')">
+                                <div class="cat-icon">📱</div>
+                                <div>Elektronik</div>
+                            </div>
+                            <div class="category-item" onclick="filterByCategory('fashion')">
+                                <div class="cat-icon">👕</div>
+                                <div>Fashion</div>
+                            </div>
+                            <div class="category-item" onclick="filterByCategory('kendaraan')">
+                                <div class="cat-icon">🚗</div>
+                                <div>Kendaraan</div>
+                            </div>
+                            <div class="category-item" onclick="filterByCategory('rumah-tangga')">
+                                <div class="cat-icon">🏠</div>
+                                <div>Rumah Tangga</div>
+                            </div>
+                            <div class="category-item" onclick="filterByCategory('hobi')">
+                                <div class="cat-icon">🎮</div>
+                                <div>Hobi & Olahraga</div>
+                            </div>
+                            <div class="category-item" onclick="filterByCategory('lainnya')">
+                                <div class="cat-icon">📦</div>
+                                <div>Lainnya</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="featured-items">
+                        <h2>⭐ Barang Terbaru & Terpopuler!</h2>
+                        <div id="items-container" class="items-grid">
+                            <!-- Items will be loaded here by JavaScript -->
+                        </div>
                     </div>
                 </div>
-                
-                <div class="counter">
-                    <p>You are visitor number:</p>
-                    <div class="visitor-count" onclick="incrementCounter()">00001</div>
+
+                <div class="sidebar">
+                    <div class="stats-box">
+                        <h3>📊 Statistik Situs</h3>
+                        <p>👥 Pengguna: <span class="stat-number">12,543</span></p>
+                        <p>📦 Barang Aktif: <span class="stat-number">8,921</span></p>
+                        <p>✅ Terjual: <span class="stat-number">45,678</span></p>
+                        <div class="visitor-count" onclick="incrementCounter()">
+                            Visitor: <span id="counter">00001</span>
+                        </div>
+                    </div>
+
+                    <div class="tips-box">
+                        <h3>💡 Tips Belanja Aman</h3>
+                        <ul>
+                            <li>✓ Cek foto dengan teliti</li>
+                            <li>✓ Tanya kondisi barang</li>
+                            <li>✓ Bertemu di tempat aman</li>
+                            <li>✓ Periksa sebelum bayar</li>
+                            <li>✓ Minta nota/garansi</li>
+                        </ul>
+                    </div>
+
+                    <div class="promo-box">
+                        <h3>🎉 Promo Spesial!</h3>
+                        <p class="blink">GRATIS posting iklan sampai 100 barang!</p>
+                        <button onclick="alert('Fitur ini segera hadir!')">Daftar Sekarang!</button>
+                    </div>
                 </div>
-                
-                <!-- Hidden Easter egg - clicking this will trigger the secret message -->
-                <div class="easter-egg" onclick="showSecret()">.</div>
             </div>
-            
-            <div class="sidebar">
-                <div class="about-me">
-                    <h3>About Me</h3>
-                    <img src="https://web.archive.org/web/20090830094535/http://www.geocities.com/Hollywood/Hills/8521/images/myhome.gif" alt="My Home">
-                    <p>Name: John Doe</p>
-                    <p>Age: 25</p>
-                    <p>Location: Cyberspace</p>
-                    <p>Email: <a href="mailto:webmaster@example.com">webmaster@example.com</a></p>
+
+            <!-- BROWSE SECTION -->
+            <div id="browse-section" class="section">
+                <div class="content full-width">
+                    <h2>📦 Jelajahi Semua Barang</h2>
+                    <div class="filter-bar">
+                        <label>Kategori:</label>
+                        <select id="category-filter" onchange="applyFilters()">
+                            <option value="semua">Semua Kategori</option>
+                            <option value="elektronik">📱 Elektronik</option>
+                            <option value="fashion">👕 Fashion</option>
+                            <option value="kendaraan">🚗 Kendaraan</option>
+                            <option value="rumah-tangga">🏠 Rumah Tangga</option>
+                            <option value="hobi">🎮 Hobi & Olahraga</option>
+                            <option value="lainnya">📦 Lainnya</option>
+                        </select>
+
+                        <label>Urutkan:</label>
+                        <select id="sort-filter" onchange="applyFilters()">
+                            <option value="terbaru">Terbaru</option>
+                            <option value="termurah">Termurah</option>
+                            <option value="termahal">Termahal</option>
+                        </select>
+
+                        <button onclick="applyFilters()">Terapkan Filter</button>
+                    </div>
+                    <div id="browse-items-container" class="items-grid">
+                        <!-- Items will be loaded here -->
+                    </div>
                 </div>
-                
-                <div class="updates">
-                    <h3>Latest Updates</h3>
-                    <p><span class="date">05/15/2000</span> - Added new links page!</p>
-                    <p><span class="date">04/22/2000</span> - Fixed broken images</p>
-                    <p><span class="date">03/10/2000</span> - Site launched!</p>
+            </div>
+
+            <!-- SELL SECTION -->
+            <div id="sell-section" class="section">
+                <div class="content full-width">
+                    <h2>💰 Jual Barang Anda</h2>
+                    <div class="sell-form">
+                        <p class="info-text">Isi formulir di bawah untuk mulai berjualan! <span class="blink">100% GRATIS!</span></p>
+
+                        <form id="sell-form" onsubmit="submitListing(event)">
+                            <div class="form-group">
+                                <label>Nama Barang: *</label>
+                                <input type="text" id="item-name" required placeholder="Contoh: Laptop ASUS ROG Gaming">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kategori: *</label>
+                                <select id="item-category" required>
+                                    <option value="">-- Pilih Kategori --</option>
+                                    <option value="elektronik">📱 Elektronik</option>
+                                    <option value="fashion">👕 Fashion</option>
+                                    <option value="kendaraan">🚗 Kendaraan</option>
+                                    <option value="rumah-tangga">🏠 Rumah Tangga</option>
+                                    <option value="hobi">🎮 Hobi & Olahraga</option>
+                                    <option value="lainnya">📦 Lainnya</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Harga (Rp): *</label>
+                                <input type="number" id="item-price" required placeholder="Contoh: 5000000" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kondisi: *</label>
+                                <select id="item-condition" required>
+                                    <option value="">-- Pilih Kondisi --</option>
+                                    <option value="Baru">Baru</option>
+                                    <option value="Seperti Baru">Seperti Baru</option>
+                                    <option value="Baik">Baik</option>
+                                    <option value="Cukup Baik">Cukup Baik</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Lokasi: *</label>
+                                <input type="text" id="item-location" required placeholder="Contoh: Jakarta Selatan">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Deskripsi: *</label>
+                                <textarea id="item-description" required rows="4" placeholder="Jelaskan kondisi barang, kelengkapan, alasan jual, dll."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Kontak (No HP/WhatsApp): *</label>
+                                <input type="text" id="item-contact" required placeholder="Contoh: 08123456789">
+                            </div>
+
+                            <div class="form-group">
+                                <label>URL Foto Barang:</label>
+                                <input type="url" id="item-image" placeholder="https://contoh.com/foto.jpg (opsional)">
+                                <small>Masukkan link foto dari internet (Imgur, Google Photos, dll)</small>
+                            </div>
+
+                            <button type="submit" class="submit-btn">🚀 Posting Iklan Sekarang!</button>
+                        </form>
+                    </div>
                 </div>
-                
-                <div class="awards">
-                    <h3>My Awards</h3>
-                    <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/award.gif" alt="Website Award">
+            </div>
+
+            <!-- ABOUT SECTION -->
+            <div id="about-section" class="section">
+                <div class="content full-width">
+                    <h2>ℹ️ Tentang Barang Bekas Kita</h2>
+                    <div class="about-content">
+                        <p>Selamat datang di <strong>Barang Bekas Kita</strong>, marketplace barang preloved (bekas) terpercaya di Indonesia! 🇮🇩</p>
+
+                        <h3>🎯 Misi Kami</h3>
+                        <p>Kami percaya bahwa barang bekas yang masih bagus layak mendapat kesempatan kedua. Dengan membeli barang preloved, Anda tidak hanya menghemat uang, tapi juga membantu mengurangi sampah dan menjaga lingkungan!</p>
+
+                        <h3>✨ Kenapa Pilih Kami?</h3>
+                        <ul class="benefits-list">
+                            <li>💯 <strong>100% GRATIS</strong> - Posting iklan tanpa biaya apapun!</li>
+                            <li>🚀 <strong>Mudah & Cepat</strong> - Proses posting hanya 2 menit!</li>
+                            <li>🔒 <strong>Aman & Terpercaya</strong> - Ribuan transaksi sukses setiap hari</li>
+                            <li>📱 <strong>Kategori Lengkap</strong> - Dari elektronik sampai fashion</li>
+                            <li>🌏 <strong>Seluruh Indonesia</strong> - Jangkau pembeli di mana saja</li>
+                        </ul>
+
+                        <h3>📊 Statistik Kami</h3>
+                        <table class="stats-table">
+                            <tr>
+                                <td>👥 Total Pengguna</td>
+                                <td class="stat-value">12,543+</td>
+                            </tr>
+                            <tr>
+                                <td>📦 Barang Aktif</td>
+                                <td class="stat-value">8,921+</td>
+                            </tr>
+                            <tr>
+                                <td>✅ Transaksi Sukses</td>
+                                <td class="stat-value">45,678+</td>
+                            </tr>
+                            <tr>
+                                <td>💰 Total Nilai Transaksi</td>
+                                <td class="stat-value">Rp 89 Miliar+</td>
+                            </tr>
+                        </table>
+
+                        <div class="cta-box">
+                            <h3>🎉 Siap Mulai?</h3>
+                            <p>Jual barang bekas Anda sekarang atau temukan barang impian dengan harga terjangkau!</p>
+                            <button onclick="showSection('sell')" class="cta-button">Mulai Berjualan</button>
+                            <button onclick="showSection('browse')" class="cta-button secondary">Jelajahi Barang</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTACT SECTION -->
+            <div id="contact-section" class="section">
+                <div class="content full-width">
+                    <h2>📧 Hubungi Kami</h2>
+                    <div class="contact-content">
+                        <p>Punya pertanyaan, saran, atau masalah? Kami siap membantu!</p>
+
+                        <div class="contact-grid">
+                            <div class="contact-method">
+                                <h3>📱 WhatsApp</h3>
+                                <p>+62 812-3456-7890</p>
+                                <button onclick="alert('WhatsApp: +62 812-3456-7890')">Chat Sekarang</button>
+                            </div>
+
+                            <div class="contact-method">
+                                <h3>📧 Email</h3>
+                                <p>support@barangbekaskita.com</p>
+                                <button onclick="alert('Email: support@barangbekaskita.com')">Kirim Email</button>
+                            </div>
+
+                            <div class="contact-method">
+                                <h3>🕐 Jam Operasional</h3>
+                                <p>Senin - Jumat: 09.00 - 18.00 WIB</p>
+                                <p>Sabtu: 09.00 - 15.00 WIB</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-section">
+                            <h3>❓ Pertanyaan Umum (FAQ)</h3>
+                            <div class="faq-item">
+                                <strong>Q: Apakah gratis posting iklan?</strong>
+                                <p>A: Ya! 100% gratis tanpa biaya tersembunyi.</p>
+                            </div>
+                            <div class="faq-item">
+                                <strong>Q: Bagaimana cara pembayaran?</strong>
+                                <p>A: Pembayaran dilakukan langsung antara penjual dan pembeli. Kami rekomendasikan COD (Cash on Delivery) untuk keamanan.</p>
+                            </div>
+                            <div class="faq-item">
+                                <strong>Q: Apakah ada garansi?</strong>
+                                <p>A: Garansi tergantung kesepakatan penjual dan pembeli. Selalu tanya ke penjual sebelum membeli.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
-        
+
         <footer>
-            <p>© 2000 My Awesome Website. All rights reserved.</p>
-            <div class="badges">
-                <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/ie.gif" alt="Best viewed with Internet Explorer">
-                <img src="https://web.archive.org/web/20091026152350/http://www.geocities.com/Hollywood/Hills/8521/images/netscape.gif" alt="Netscape Now!">
+            <p>© 2000-2025 Barang Bekas Kita. Semua hak cipta dilindungi.</p>
+            <p class="footer-tagline">🌟 Marketplace Barang Preloved Terpercaya di Indonesia 🌟</p>
+            <div class="footer-links">
+                <a href="#" onclick="showSection('about')">Tentang Kami</a> |
+                <a href="#" onclick="showSection('contact')">Kontak</a> |
+                <a href="#" onclick="alert('Syarat & Ketentuan akan segera hadir!')">Syarat & Ketentuan</a> |
+                <a href="#" onclick="alert('Kebijakan Privasi akan segera hadir!')">Privasi</a>
             </div>
-            <p class="webring">
-                <a href="#">« Previous</a> | 
-                <a href="#">Join Our Webring</a> | 
-                <a href="#">Next »</a>
-            </p>
-            <div class="hit-counter">
-                <img src="https://web.archive.org/web/20090830094535/http://www.geocities.com/Hollywood/Hills/8521/images/counter.gif" alt="Hit Counter">
-            </div>
+            <p class="made-with">Dibuat dengan ❤️ untuk Indonesia</p>
         </footer>
     </div>
-    
-    <!-- Hidden comment with "secret" message - another classic early 2000s website feature -->
-    <!-- 
-    ***************************************
-    * Congratulations on finding this     *
-    * secret message! You must be viewing *
-    * my page's source code!              *
-    *                                     *
-    * Email me at webmaster@example.com   *
-    * to claim your prize!                *
-    ***************************************
-    -->
 </body>
-</html> 
+</html>
