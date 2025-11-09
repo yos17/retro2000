@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barang Bekas Kita - Marketplace Barang Preloved Indonesia</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Config Script (loads before main script) -->
+    <script src="config.js"></script>
+
+    <!-- Main Application Script -->
+    <script src="script.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -192,9 +200,18 @@
                             </div>
 
                             <div class="form-group">
-                                <label>URL Foto Barang:</label>
-                                <input type="url" id="item-image" placeholder="https://contoh.com/foto.jpg (opsional)">
-                                <small>Masukkan link foto dari internet (Imgur, Google Photos, dll)</small>
+                                <label>Foto Barang:</label>
+                                <input type="file" id="item-image-file" accept="image/*" onchange="handleImagePreview(event)">
+                                <small>Upload foto barang (JPEG, PNG, max 5MB) - Atau masukkan URL di bawah</small>
+                                <div id="image-preview" style="margin-top: 10px; display: none;">
+                                    <img id="preview-img" src="" alt="Preview" style="max-width: 200px; border-radius: 8px; border: 2px solid #e2e8f0;">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Atau, URL Foto dari Internet:</label>
+                                <input type="url" id="item-image-url" placeholder="https://contoh.com/foto.jpg (opsional)">
+                                <small>Jika tidak upload file, Anda bisa masukkan link foto dari internet</small>
                             </div>
 
                             <button type="submit" class="submit-btn">🚀 Posting Iklan Sekarang!</button>
