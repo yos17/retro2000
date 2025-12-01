@@ -11,6 +11,7 @@ from typing import Dict, Any
 
 from .engine import ConvexSolver, ObjectiveType, solve_from_dict
 from . import templates
+from . import business_templates
 
 app = Flask(__name__, static_folder='../static', static_url_path='/static')
 CORS(app)  # Enable CORS for frontend requests
@@ -22,7 +23,13 @@ CORS(app)  # Enable CORS for frontend requests
 
 @app.route('/')
 def index():
-    """Serve the main optimizer page"""
+    """Serve the main modern app page"""
+    return send_from_directory('..', 'app.html')
+
+
+@app.route('/retro')
+def retro_index():
+    """Serve the retro optimizer page"""
     return send_from_directory('..', 'optimizer.html')
 
 
@@ -93,54 +100,112 @@ def list_templates():
     """List available problem templates"""
     return jsonify({
         "templates": [
+            # Classic OR Templates
             {
                 "id": "portfolio",
                 "name": "Portfolio Optimization",
-                "description": "Markowitz mean-variance portfolio optimization (QP)",
-                "problem_type": "quadratic"
+                "description": "Markowitz mean-variance portfolio optimization",
+                "problem_type": "quadratic",
+                "category": "finance",
+                "icon": "trending_up"
             },
             {
                 "id": "diet",
                 "name": "Diet Problem",
-                "description": "Minimize cost while meeting nutritional requirements (LP)",
-                "problem_type": "linear"
+                "description": "Minimize cost while meeting nutritional requirements",
+                "problem_type": "linear",
+                "category": "planning",
+                "icon": "restaurant"
             },
             {
                 "id": "transportation",
                 "name": "Transportation Problem",
-                "description": "Minimize shipping costs from sources to destinations (LP)",
-                "problem_type": "linear"
+                "description": "Minimize shipping costs from sources to destinations",
+                "problem_type": "linear",
+                "category": "logistics",
+                "icon": "local_shipping"
             },
             {
                 "id": "resource_allocation",
                 "name": "Resource Allocation",
-                "description": "Maximize profit given limited resources (LP)",
-                "problem_type": "linear"
+                "description": "Maximize profit given limited resources",
+                "problem_type": "linear",
+                "category": "planning",
+                "icon": "inventory_2"
             },
             {
                 "id": "regression",
                 "name": "Regularized Regression",
-                "description": "Ridge, LASSO, or Elastic Net regression (QP/SOCP)",
-                "problem_type": "quadratic"
+                "description": "Ridge, LASSO, or Elastic Net regression",
+                "problem_type": "quadratic",
+                "category": "ml",
+                "icon": "show_chart"
             },
             {
                 "id": "knapsack",
                 "name": "Knapsack Problem",
-                "description": "Select items to maximize value within weight limit (MILP)",
-                "problem_type": "mixed_integer"
+                "description": "Select items to maximize value within weight limit",
+                "problem_type": "mixed_integer",
+                "category": "planning",
+                "icon": "shopping_bag"
             },
             {
                 "id": "simple_lp",
                 "name": "Simple 2D LP",
-                "description": "Two-variable linear program for visualization (LP)",
-                "problem_type": "linear"
+                "description": "Two-variable linear program for visualization",
+                "problem_type": "linear",
+                "category": "education",
+                "icon": "school"
             },
             {
                 "id": "min_cost_flow",
                 "name": "Minimum Cost Flow",
-                "description": "Network flow optimization (LP)",
-                "problem_type": "linear"
+                "description": "Network flow optimization",
+                "problem_type": "linear",
+                "category": "logistics",
+                "icon": "account_tree"
+            },
+            # Business Templates
+            {
+                "id": "pizza_shop",
+                "name": "Pizza Shop Optimizer",
+                "description": "Optimize menu production, pricing, and ingredients",
+                "problem_type": "mixed_integer",
+                "category": "business",
+                "icon": "local_pizza"
+            },
+            {
+                "id": "staff_scheduling",
+                "name": "Staff Scheduling",
+                "description": "Minimize labor costs with adequate shift coverage",
+                "problem_type": "mixed_integer",
+                "category": "business",
+                "icon": "groups"
+            },
+            {
+                "id": "inventory_ordering",
+                "name": "Inventory Ordering",
+                "description": "Optimize order quantities to minimize costs",
+                "problem_type": "linear",
+                "category": "business",
+                "icon": "inventory"
+            },
+            {
+                "id": "pricing",
+                "name": "Pricing Optimization",
+                "description": "Find optimal prices considering demand elasticity",
+                "problem_type": "quadratic",
+                "category": "business",
+                "icon": "attach_money"
             }
+        ],
+        "categories": [
+            {"id": "business", "name": "Business", "description": "Real-world business optimization"},
+            {"id": "finance", "name": "Finance", "description": "Investment and portfolio problems"},
+            {"id": "logistics", "name": "Logistics", "description": "Transportation and supply chain"},
+            {"id": "planning", "name": "Planning", "description": "Resource and production planning"},
+            {"id": "ml", "name": "Machine Learning", "description": "ML and statistical problems"},
+            {"id": "education", "name": "Education", "description": "Learning and visualization"}
         ]
     })
 
@@ -471,6 +536,59 @@ def get_example(template_id: str):
                 {"from": "Factory2", "to": "Store2", "cost": 2, "capacity": 80},
                 {"from": "Factory2", "to": "Store3", "cost": 5, "capacity": 60}
             ]
+        },
+        # Business examples
+        "pizza_shop": {
+            "products": [
+                {"name": "Margherita", "price": 12, "ingredients": {"dough": 1, "sauce": 0.5, "cheese": 0.3}, "demand_estimate": 40},
+                {"name": "Pepperoni", "price": 14, "ingredients": {"dough": 1, "sauce": 0.5, "cheese": 0.3, "pepperoni": 0.2}, "demand_estimate": 50},
+                {"name": "Veggie", "price": 13, "ingredients": {"dough": 1, "sauce": 0.5, "cheese": 0.2, "vegetables": 0.4}, "demand_estimate": 25},
+                {"name": "BBQ Chicken", "price": 16, "ingredients": {"dough": 1, "bbq_sauce": 0.5, "cheese": 0.3, "chicken": 0.3}, "demand_estimate": 35}
+            ],
+            "ingredient_costs": {"dough": 1.5, "sauce": 2, "cheese": 4, "pepperoni": 6, "vegetables": 2, "bbq_sauce": 3, "chicken": 5},
+            "ingredient_inventory": {"dough": 200, "sauce": 80, "cheese": 60, "pepperoni": 30, "vegetables": 40, "bbq_sauce": 40, "chicken": 40},
+            "labor_cost_per_item": [2, 2.5, 2.5, 3]
+        },
+        "staff_scheduling": {
+            "shifts": [
+                {"name": "Mon AM", "hours": 6},
+                {"name": "Mon PM", "hours": 6},
+                {"name": "Tue AM", "hours": 6},
+                {"name": "Tue PM", "hours": 6},
+                {"name": "Wed AM", "hours": 6},
+                {"name": "Wed PM", "hours": 6}
+            ],
+            "staff": [
+                {"name": "Alice", "hourly_rate": 15, "availability": [0, 1, 2, 3, 4, 5]},
+                {"name": "Bob", "hourly_rate": 14, "availability": [0, 2, 4]},
+                {"name": "Carol", "hourly_rate": 16, "availability": [1, 3, 5]},
+                {"name": "Dave", "hourly_rate": 13, "availability": [0, 1, 2, 3, 4, 5]}
+            ],
+            "min_staff_per_shift": [2, 2, 2, 2, 2, 2]
+        },
+        "inventory_ordering": {
+            "items": [
+                {"name": "Flour", "unit_cost": 2, "holding_cost": 0.1},
+                {"name": "Tomatoes", "unit_cost": 3, "holding_cost": 0.5},
+                {"name": "Cheese", "unit_cost": 8, "holding_cost": 0.4},
+                {"name": "Pepperoni", "unit_cost": 12, "holding_cost": 0.3}
+            ],
+            "demand_forecast": [100, 50, 40, 20],
+            "current_inventory": [20, 10, 5, 5],
+            "storage_capacity": 300,
+            "budget": 1000,
+            "min_safety_stock": [10, 5, 5, 3]
+        },
+        "pricing": {
+            "products": [
+                {"name": "Small Pizza", "base_price": 10},
+                {"name": "Medium Pizza", "base_price": 14},
+                {"name": "Large Pizza", "base_price": 18}
+            ],
+            "price_range": [[8, 12], [12, 18], [15, 24]],
+            "base_demand": [50, 80, 40],
+            "price_elasticity": [1.2, 1.0, 0.8],
+            "costs": [4, 6, 8]
         }
     }
 
@@ -492,6 +610,96 @@ def _format_template_result(result) -> Dict[str, Any]:
         "interpretation": result.interpretation,
         "message": result.message
     })
+
+
+# =============================================================================
+# BUSINESS TEMPLATE ENDPOINTS
+# =============================================================================
+
+@app.route('/api/templates/pizza_shop', methods=['POST'])
+def solve_pizza_shop():
+    """Solve pizza shop menu optimization"""
+    try:
+        data = request.get_json()
+        result = business_templates.pizza_shop_menu_optimization(
+            products=data['products'],
+            ingredient_costs=data['ingredient_costs'],
+            ingredient_inventory=data['ingredient_inventory'],
+            labor_cost_per_item=data['labor_cost_per_item'],
+            max_daily_production=data.get('max_daily_production')
+        )
+        return _format_template_result(result)
+    except Exception as e:
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+@app.route('/api/templates/staff_scheduling', methods=['POST'])
+def solve_staff_scheduling():
+    """Solve staff scheduling problem"""
+    try:
+        data = request.get_json()
+        result = business_templates.staff_scheduling(
+            shifts=data['shifts'],
+            staff=data['staff'],
+            min_staff_per_shift=data['min_staff_per_shift'],
+            max_hours_per_week=data.get('max_hours_per_week', 40)
+        )
+        return _format_template_result(result)
+    except Exception as e:
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+@app.route('/api/templates/inventory_ordering', methods=['POST'])
+def solve_inventory_ordering():
+    """Solve inventory ordering problem"""
+    try:
+        data = request.get_json()
+        result = business_templates.inventory_ordering(
+            items=data['items'],
+            demand_forecast=data['demand_forecast'],
+            current_inventory=data['current_inventory'],
+            storage_capacity=data['storage_capacity'],
+            budget=data['budget'],
+            min_safety_stock=data.get('min_safety_stock')
+        )
+        return _format_template_result(result)
+    except Exception as e:
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+@app.route('/api/templates/pricing', methods=['POST'])
+def solve_pricing():
+    """Solve pricing optimization problem"""
+    try:
+        data = request.get_json()
+        result = business_templates.pricing_optimization(
+            products=data['products'],
+            price_range=data['price_range'],
+            base_demand=data['base_demand'],
+            price_elasticity=data['price_elasticity'],
+            costs=data['costs'],
+            capacity=data.get('capacity')
+        )
+        return _format_template_result(result)
+    except Exception as e:
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+@app.route('/api/business/analyze_pizza_shop', methods=['POST'])
+def analyze_pizza_shop():
+    """Comprehensive pizza shop analysis"""
+    try:
+        data = request.get_json()
+        result = business_templates.analyze_pizza_shop(
+            menu=data['menu'],
+            monthly_fixed_costs=data['monthly_fixed_costs'],
+            ingredients=data['ingredients'],
+            daily_capacity=data['daily_capacity'],
+            days_per_month=data.get('days_per_month', 26)
+        )
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
 
 # =============================================================================

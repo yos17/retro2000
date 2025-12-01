@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiSolve - Business Optimization Made Simple</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="#" class="logo">
+                    <span class="logo-icon material-icons-round">auto_graph</span>
+                    <span class="logo-text">OptiSolve</span>
+                </a>
+                <div class="nav-links">
+                    <a href="#templates" class="nav-link active">Templates</a>
+                    <a href="#how-it-works" class="nav-link">How it Works</a>
+                    <a href="#about" class="nav-link">About</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Optimize Your Business with AI-Powered Math</h1>
+                <p class="hero-subtitle">From pizza shops to investment portfolios, our solver finds the optimal solution for your business problems.</p>
+                <div class="hero-cta">
+                    <a href="#templates" class="btn btn-primary">Get Started</a>
+                    <a href="#how-it-works" class="btn btn-secondary">Learn More</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value">12+</span>
+                        <span class="stat-label">Problem Templates</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">5</span>
+                        <span class="stat-label">Solver Engines</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">100%</span>
+                        <span class="stat-label">Free & Open</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Category Filter -->
+        <section class="categories" id="templates">
+            <div class="container">
+                <h2 class="section-title">Choose Your Optimization Problem</h2>
+                <div class="category-tabs">
+                    <button class="category-tab active" data-category="all">All</button>
+                    <button class="category-tab" data-category="business">
+                        <span class="material-icons-round">storefront</span>
+                        Business
+                    </button>
+                    <button class="category-tab" data-category="finance">
+                        <span class="material-icons-round">trending_up</span>
+                        Finance
+                    </button>
+                    <button class="category-tab" data-category="logistics">
+                        <span class="material-icons-round">local_shipping</span>
+                        Logistics
+                    </button>
+                    <button class="category-tab" data-category="planning">
+                        <span class="material-icons-round">calendar_today</span>
+                        Planning
+                    </button>
+                    <button class="category-tab" data-category="ml">
+                        <span class="material-icons-round">psychology</span>
+                        ML
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Template Cards -->
+        <section class="templates">
+            <div class="container">
+                <div class="template-grid" id="template-grid">
+                    <!-- Templates loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Problem Input Modal -->
+        <div class="modal" id="problem-modal">
+            <div class="modal-backdrop" onclick="closeModal()"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title-section">
+                        <span class="material-icons-round modal-icon" id="modal-icon">auto_graph</span>
+                        <div>
+                            <h3 id="modal-title">Template Name</h3>
+                            <p id="modal-description" class="modal-subtitle">Description</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Form loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="loadExample()">Load Example</button>
+                    <button class="btn btn-primary" onclick="solveProblem()">
+                        <span class="material-icons-round">play_arrow</span>
+                        Solve
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Modal -->
+        <div class="modal" id="results-modal">
+            <div class="modal-backdrop" onclick="closeResultsModal()"></div>
+            <div class="modal-content modal-lg">
+                <div class="modal-header">
+                    <div class="modal-title-section">
+                        <span class="material-icons-round modal-icon success" id="result-status-icon">check_circle</span>
+                        <div>
+                            <h3 id="result-title">Optimization Results</h3>
+                            <p id="result-status" class="modal-subtitle">Status: Optimal</p>
+                        </div>
+                    </div>
+                    <button class="modal-close" onclick="closeResultsModal()">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="results-body">
+                    <!-- Results loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeResultsModal()">Close</button>
+                    <button class="btn btn-primary" onclick="downloadResults()">
+                        <span class="material-icons-round">download</span>
+                        Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>Solving optimization problem...</p>
+            </div>
+        </div>
+
+        <!-- How it Works -->
+        <section class="how-it-works" id="how-it-works">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-icon">
+                            <span class="material-icons-round">touch_app</span>
+                        </div>
+                        <h3>1. Choose a Template</h3>
+                        <p>Select from our library of pre-built optimization problems or create your own.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">
+                            <span class="material-icons-round">edit</span>
+                        </div>
+                        <h3>2. Enter Your Data</h3>
+                        <p>Input your business parameters, costs, constraints, and objectives.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">
+                            <span class="material-icons-round">rocket_launch</span>
+                        </div>
+                        <h3>3. Get Optimal Solution</h3>
+                        <p>Our solver finds the mathematically optimal solution in seconds.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="about" id="about">
+            <div class="container">
+                <div class="about-grid">
+                    <div class="about-content">
+                        <h2>Powered by Convex Optimization</h2>
+                        <p>OptiSolve uses state-of-the-art convex optimization algorithms to find globally optimal solutions. Our solver is powered by CVXPY, the industry-standard library for disciplined convex programming.</p>
+                        <div class="tech-stack">
+                            <span class="tech-badge">CVXPY</span>
+                            <span class="tech-badge">CLARABEL</span>
+                            <span class="tech-badge">ECOS</span>
+                            <span class="tech-badge">OSQP</span>
+                            <span class="tech-badge">Python</span>
+                        </div>
+                    </div>
+                    <div class="about-features">
+                        <div class="feature">
+                            <span class="material-icons-round">verified</span>
+                            <div>
+                                <h4>Guaranteed Optimal</h4>
+                                <p>Convex problems have no local minima traps</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <span class="material-icons-round">speed</span>
+                            <div>
+                                <h4>Fast & Efficient</h4>
+                                <p>Polynomial-time algorithms for any problem size</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <span class="material-icons-round">insights</span>
+                            <div>
+                                <h4>Sensitivity Analysis</h4>
+                                <p>Understand how changes affect your solution</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <span class="logo-icon material-icons-round">auto_graph</span>
+                        <span class="logo-text">OptiSolve</span>
+                    </div>
+                    <p class="footer-text">Open source optimization solver for everyone.</p>
+                    <div class="footer-links">
+                        <a href="https://www.cvxpy.org" target="_blank">CVXPY Docs</a>
+                        <a href="https://web.stanford.edu/~boyd/cvxbook/" target="_blank">Boyd & Vandenberghe</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
