@@ -86,6 +86,14 @@ const templateForms = {
             { name: 'arcs', label: 'Arcs (JSON)', type: 'textarea', placeholder: '[{"from": "Factory1", "to": "Store1", "cost": 2}]' }
         ]
     },
+    assignment: {
+        fields: [
+            { name: 'worker_names', label: 'Worker Names', type: 'text', placeholder: 'Alice, Bob, Carol' },
+            { name: 'task_names', label: 'Task Names', type: 'text', placeholder: 'Task 1, Task 2, Task 3' },
+            { name: 'costs', label: 'Cost Matrix', type: 'textarea', placeholder: '[[14, 5, 8], [2, 12, 6], [7, 8, 3]]', help: 'costs[i][j] = cost of assigning worker i to task j' },
+            { name: 'maximize', label: 'Maximize (profit)', type: 'checkbox', default: false }
+        ]
+    },
     pizza_shop: {
         fields: [
             { name: 'products', label: 'Products (JSON)', type: 'textarea', placeholder: '[{"name": "Margherita", "price": 12, "ingredients": {"dough": 1}, "demand_estimate": 40}]', help: 'Array of products with name, price, ingredients, demand' },
@@ -333,8 +341,10 @@ function collectFormData() {
 }
 
 // =============================================================================
-// SOLVING
+// SOLVING WITH VALIDATION
 // =============================================================================
+
+let skipAnalysis = false;
 
 async function solveProblem() {
     if (!currentTemplate) return;
@@ -343,27 +353,279 @@ async function solveProblem() {
 
     try {
         const data = collectFormData();
-        const response = await fetch(`${API_BASE}/templates/${currentTemplate}`, {
+
+        // Step 1: Analyze the problem first (unless skipped)
+        if (!skipAnalysis) {
+            const analysisResponse = await fetch(`${API_BASE}/analyze/${currentTemplate}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (analysisResponse.ok) {
+                const analysis = await analysisResponse.json();
+
+                // Check if there are questions/issues
+                if (analysis.questions && analysis.questions.length > 0) {
+                    hideLoading();
+
+                    // Show clarification dialog
+                    const shouldProceed = await showClarificationDialog(analysis);
+                    if (!shouldProceed) {
+                        return; // User cancelled
+                    }
+                    showLoading();
+                }
+            }
+        }
+
+        // Step 2: Solve with validation
+        const response = await fetch(`${API_BASE}/solve_with_validation/${currentTemplate}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
 
         const result = await response.json();
-        lastResult = result;
 
         hideLoading();
         closeModal();
+        skipAnalysis = false; // Reset for next solve
 
-        if (response.ok) {
-            displayResults(result);
+        if (response.ok && result.solution) {
+            lastResult = result.solution;
+            displayResultsWithValidation(result);
+        } else if (response.ok && result.phase === 'analysis') {
+            // Analysis failed - show errors
+            displayAnalysisErrors(result.analysis);
         } else {
             displayError(result.error || 'Unknown error');
         }
     } catch (error) {
         hideLoading();
+        skipAnalysis = false;
         displayError(error.message);
     }
+}
+
+async function showClarificationDialog(analysis) {
+    return new Promise((resolve) => {
+        const questions = analysis.questions;
+        const hasErrors = questions.some(q => q.severity === 'error');
+        const hasWarnings = questions.some(q => q.severity === 'warning');
+
+        let html = `
+            <div class="clarification-dialog">
+                <div class="clarification-header">
+                    <span class="material-icons-round ${hasErrors ? 'error' : 'warning'}">
+                        ${hasErrors ? 'error' : 'help_outline'}
+                    </span>
+                    <h4>${hasErrors ? 'Issues Found' : 'Clarification Needed'}</h4>
+                </div>
+                <div class="clarification-content">
+        `;
+
+        for (const q of questions) {
+            const icon = q.severity === 'error' ? 'error' :
+                        q.severity === 'warning' ? 'warning' : 'info';
+            html += `
+                <div class="clarification-item ${q.severity}">
+                    <span class="material-icons-round">${icon}</span>
+                    <div class="clarification-text">
+                        <p class="question">${q.question}</p>
+                        <p class="reason">${q.reason}</p>
+                        ${q.suggestion ? `<p class="suggestion"><strong>Suggestion:</strong> ${q.suggestion}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `
+                </div>
+                <div class="clarification-actions">
+                    <button class="btn btn-secondary" id="clarify-cancel">Go Back</button>
+                    ${!hasErrors ? `<button class="btn btn-primary" id="clarify-proceed">Proceed Anyway</button>` : ''}
+                </div>
+            </div>
+        `;
+
+        // Create modal for clarification
+        const modalDiv = document.createElement('div');
+        modalDiv.className = 'modal active';
+        modalDiv.id = 'clarification-modal';
+        modalDiv.innerHTML = `
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-body">
+                    ${html}
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modalDiv);
+
+        // Event handlers
+        document.getElementById('clarify-cancel').onclick = () => {
+            modalDiv.remove();
+            resolve(false);
+        };
+
+        const proceedBtn = document.getElementById('clarify-proceed');
+        if (proceedBtn) {
+            proceedBtn.onclick = () => {
+                modalDiv.remove();
+                skipAnalysis = true; // Skip re-analysis on retry
+                resolve(true);
+            };
+        }
+
+        modalDiv.querySelector('.modal-backdrop').onclick = () => {
+            modalDiv.remove();
+            resolve(false);
+        };
+    });
+}
+
+function displayResultsWithValidation(result) {
+    const solution = result.solution;
+    const validation = result.validation;
+    const analysis = result.analysis;
+    const isSuccess = solution.status === 'optimal';
+
+    document.getElementById('result-status-icon').textContent = isSuccess ? 'check_circle' : 'error';
+    document.getElementById('result-status-icon').className = `material-icons-round modal-icon ${isSuccess ? 'success' : 'error'}`;
+    document.getElementById('result-title').textContent = 'Optimization Results';
+    document.getElementById('result-status').textContent = `Status: ${solution.status}`;
+
+    let html = `
+        <div class="result-summary ${isSuccess ? '' : 'error'}">
+            <div class="result-value">${formatNumber(solution.optimal_value)}</div>
+            <div class="result-label">Optimal Value</div>
+        </div>
+    `;
+
+    // Validation results
+    if (validation && validation.checks && validation.checks.length > 0) {
+        html += `
+            <div class="result-section validation-section">
+                <h4><span class="material-icons-round">verified</span> Solution Validation</h4>
+                <div class="validation-checks">
+        `;
+
+        for (const check of validation.checks) {
+            html += `
+                <div class="validation-check ${check.passed ? 'passed' : 'failed'}">
+                    <span class="material-icons-round">${check.passed ? 'check_circle' : 'cancel'}</span>
+                    <div>
+                        <strong>${check.name}</strong>
+                        <p>${check.details}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `</div></div>`;
+
+        if (validation.suggestions && validation.suggestions.length > 0) {
+            html += `
+                <div class="validation-suggestions">
+                    ${validation.suggestions.map(s => `<p><span class="material-icons-round">lightbulb</span> ${s}</p>`).join('')}
+                </div>
+            `;
+        }
+    }
+
+    // Analysis warnings (if any)
+    if (analysis && analysis.warnings && analysis.warnings.length > 0) {
+        html += `
+            <div class="result-section warnings-section">
+                <h4><span class="material-icons-round">warning</span> Notes</h4>
+                ${analysis.warnings.map(w => `<p class="warning-item">${w}</p>`).join('')}
+            </div>
+        `;
+    }
+
+    // Variables
+    if (solution.variables && Object.keys(solution.variables).length > 0) {
+        html += `
+            <div class="result-section">
+                <h4><span class="material-icons-round">data_array</span> Variables</h4>
+                <table class="result-table">
+                    <thead><tr><th>Variable</th><th>Value</th></tr></thead>
+                    <tbody>
+                        ${Object.entries(solution.variables).map(([k, v]) => `
+                            <tr><td>${k}</td><td>${formatValue(v)}</td></tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // Interpretation
+    if (solution.interpretation) {
+        html += `
+            <div class="result-section">
+                <h4><span class="material-icons-round">insights</span> Interpretation</h4>
+                ${formatInterpretation(solution.interpretation)}
+            </div>
+        `;
+    }
+
+    // Solver Info
+    html += `
+        <div class="result-section">
+            <h4><span class="material-icons-round">info</span> Solver Information</h4>
+            <div class="result-grid">
+                <div class="result-card">
+                    <div class="result-card-value">${solution.solver_stats?.solver_name || 'N/A'}</div>
+                    <div class="result-card-label">Solver</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-card-value">${solution.problem_type || 'N/A'}</div>
+                    <div class="result-card-label">Problem Type</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-card-value">${solution.is_convex ? 'Yes' : 'No'}</div>
+                    <div class="result-card-label">Convex</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('results-body').innerHTML = html;
+    document.getElementById('results-modal').classList.add('active');
+}
+
+function displayAnalysisErrors(analysis) {
+    document.getElementById('result-status-icon').textContent = 'error';
+    document.getElementById('result-status-icon').className = 'material-icons-round modal-icon error';
+    document.getElementById('result-title').textContent = 'Cannot Solve';
+    document.getElementById('result-status').textContent = 'Analysis Failed';
+
+    let html = `
+        <div class="result-summary error">
+            <div class="result-value">Errors Found</div>
+            <div class="result-label">Please fix the issues below</div>
+        </div>
+        <div class="result-section">
+            <h4><span class="material-icons-round">error</span> Issues</h4>
+    `;
+
+    for (const q of analysis.questions) {
+        html += `
+            <div class="analysis-error ${q.severity}">
+                <strong>${q.question}</strong>
+                <p>${q.reason}</p>
+                ${q.suggestion ? `<p class="suggestion">${q.suggestion}</p>` : ''}
+            </div>
+        `;
+    }
+
+    html += `</div>`;
+
+    document.getElementById('results-body').innerHTML = html;
+    document.getElementById('results-modal').classList.add('active');
 }
 
 // =============================================================================

@@ -12,6 +12,7 @@ from typing import Dict, Any
 from .engine import ConvexSolver, ObjectiveType, solve_from_dict
 from . import templates
 from . import business_templates
+from .validator import analyze_problem, validate_solution
 
 app = Flask(__name__, static_folder='../static', static_url_path='/static')
 CORS(app)  # Enable CORS for frontend requests
@@ -164,6 +165,14 @@ def list_templates():
                 "problem_type": "linear",
                 "category": "logistics",
                 "icon": "account_tree"
+            },
+            {
+                "id": "assignment",
+                "name": "Assignment Problem",
+                "description": "Optimally assign workers to tasks (H&L Ch.9)",
+                "problem_type": "linear",
+                "category": "planning",
+                "icon": "assignment_ind"
             },
             # Business Templates
             {
@@ -443,6 +452,236 @@ def solve_min_cost_flow():
         return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
 
+@app.route('/api/templates/assignment', methods=['POST'])
+def solve_assignment():
+    """
+    Solve assignment problem (H&L Chapter 9)
+
+    Request body:
+    {
+        "costs": [[...], [...], ...],
+        "worker_names": ["Alice", "Bob", ...],
+        "task_names": ["Task1", "Task2", ...],
+        "maximize": false
+    }
+    """
+    try:
+        data = request.get_json()
+        result = templates.assignment_problem(
+            costs=data['costs'],
+            worker_names=data.get('worker_names'),
+            task_names=data.get('task_names'),
+            maximize=data.get('maximize', False)
+        )
+        return _format_template_result(result)
+    except Exception as e:
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+# =============================================================================
+# PROBLEM ANALYSIS AND VALIDATION ENDPOINTS
+# =============================================================================
+
+@app.route('/api/analyze/<template_id>', methods=['POST'])
+def analyze_template(template_id: str):
+    """
+    Analyze a problem and return clarification questions before solving.
+
+    This endpoint checks:
+    - Input validity and completeness
+    - Potential issues (unbalanced problems, infeasible constraints)
+    - Suggestions for better formulation
+
+    Request body: Same as the template solve endpoint
+
+    Response:
+    {
+        "can_solve": bool,
+        "questions": [
+            {
+                "id": "question_id",
+                "question": "The question text",
+                "reason": "Why this is being asked",
+                "field": "which_input_field",
+                "severity": "error|warning|info",
+                "suggestion": "Optional suggestion"
+            }
+        ],
+        "warnings": ["list of warnings"],
+        "errors": ["list of errors"]
+    }
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        analysis = analyze_problem(template_id, data)
+        return jsonify(analysis)
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
+
+@app.route('/api/validate/<template_id>', methods=['POST'])
+def validate_template_solution(template_id: str):
+    """
+    Validate a solution after solving.
+
+    This endpoint verifies:
+    - All constraints are satisfied
+    - Optimal value is correctly computed
+    - Solution is feasible and makes sense
+
+    Request body:
+    {
+        "inputs": { ... original problem inputs ... },
+        "solution": { ... the solution returned by solver ... }
+    }
+
+    Response:
+    {
+        "is_valid": bool,
+        "checks": [
+            {
+                "name": "Check name",
+                "passed": bool,
+                "details": "Description of the check"
+            }
+        ],
+        "warnings": ["list of warnings"],
+        "errors": ["list of errors"],
+        "suggestions": ["list of suggestions"]
+    }
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        inputs = data.get('inputs', {})
+        solution = data.get('solution', {})
+
+        validation = validate_solution(template_id, inputs, solution)
+        return jsonify(validation)
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
+
+@app.route('/api/solve_with_validation/<template_id>', methods=['POST'])
+def solve_with_validation(template_id: str):
+    """
+    Analyze, solve, and validate a problem in one call.
+
+    This endpoint:
+    1. Analyzes the problem for issues
+    2. Solves if no errors (proceeds with warnings)
+    3. Validates the solution
+
+    Response includes analysis, solution, and validation results.
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        # Step 1: Analyze
+        analysis = analyze_problem(template_id, data)
+
+        # If errors, return early
+        if not analysis['can_solve']:
+            return jsonify({
+                "phase": "analysis",
+                "analysis": analysis,
+                "solution": None,
+                "validation": None,
+                "message": "Problem has errors that must be fixed before solving"
+            })
+
+        # Step 2: Solve
+        solve_functions = {
+            'portfolio': lambda d: templates.portfolio_optimization(
+                expected_returns=d['expected_returns'],
+                covariance_matrix=d['covariance_matrix'],
+                risk_aversion=d.get('risk_aversion', 1.0),
+                min_weight=d.get('min_weight', 0.0),
+                max_weight=d.get('max_weight', 1.0),
+                target_return=d.get('target_return')
+            ),
+            'diet': lambda d: templates.diet_problem(
+                food_costs=d['food_costs'],
+                food_names=d['food_names'],
+                nutrients=d['nutrients'],
+                nutrient_content=d['nutrient_content'],
+                min_nutrients=d['min_nutrients'],
+                max_nutrients=d.get('max_nutrients'),
+                max_servings=d.get('max_servings')
+            ),
+            'transportation': lambda d: templates.transportation_problem(
+                supply=d['supply'],
+                demand=d['demand'],
+                costs=d['costs'],
+                source_names=d.get('source_names'),
+                dest_names=d.get('dest_names')
+            ),
+            'assignment': lambda d: templates.assignment_problem(
+                costs=d['costs'],
+                worker_names=d.get('worker_names'),
+                task_names=d.get('task_names'),
+                maximize=d.get('maximize', False)
+            ),
+            'resource_allocation': lambda d: templates.resource_allocation(
+                profits=d['profits'],
+                resource_usage=d['resource_usage'],
+                resource_limits=d['resource_limits'],
+                product_names=d.get('product_names'),
+                resource_names=d.get('resource_names'),
+                min_production=d.get('min_production'),
+                max_production=d.get('max_production')
+            ),
+        }
+
+        if template_id not in solve_functions:
+            return jsonify({"error": f"Template {template_id} not supported for validation"}), 400
+
+        result = solve_functions[template_id](data)
+
+        solution = {
+            "status": result.status,
+            "optimal_value": result.optimal_value,
+            "variables": result.variables,
+            "solver_stats": result.solver_stats,
+            "problem_type": result.problem_type,
+            "is_convex": result.is_convex,
+            "interpretation": result.interpretation,
+            "message": result.message
+        }
+
+        # Step 3: Validate
+        validation = validate_solution(template_id, data, solution)
+
+        return jsonify({
+            "phase": "completed",
+            "analysis": analysis,
+            "solution": solution,
+            "validation": validation,
+            "message": "Problem solved and validated" if validation['is_valid'] else "Solution has validation issues"
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
+
+
 # =============================================================================
 # EXAMPLE DATA ENDPOINTS
 # =============================================================================
@@ -536,6 +775,17 @@ def get_example(template_id: str):
                 {"from": "Factory2", "to": "Store2", "cost": 2, "capacity": 80},
                 {"from": "Factory2", "to": "Store3", "cost": 5, "capacity": 60}
             ]
+        },
+        "assignment": {
+            "costs": [
+                [14, 5, 8, 7],
+                [2, 12, 6, 5],
+                [7, 8, 3, 9],
+                [2, 4, 6, 10]
+            ],
+            "worker_names": ["Alice", "Bob", "Carol", "Dave"],
+            "task_names": ["Project A", "Project B", "Project C", "Project D"],
+            "maximize": False
         },
         # Business examples
         "pizza_shop": {

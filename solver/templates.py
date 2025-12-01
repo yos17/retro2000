@@ -192,6 +192,7 @@ def diet_problem(
 
 # =============================================================================
 # TRANSPORTATION PROBLEM (Linear Programming)
+# Reference: Hillier & Lieberman, Chapter 9
 # =============================================================================
 
 def transportation_problem(
@@ -204,9 +205,13 @@ def transportation_problem(
     """
     Transportation Problem - Minimize shipping costs from sources to destinations
 
+    Per Hillier & Lieberman Ch. 9:
+    - Handles balanced and UNBALANCED problems automatically
+    - Adds dummy source/destination when supply != demand
+
     Solves: minimize sum(c_ij * x_ij)
-            subject to: sum_j(x_ij) <= supply_i  (supply constraints)
-                       sum_i(x_ij) >= demand_j   (demand constraints)
+            subject to: sum_j(x_ij) = supply_i  (supply constraints)
+                       sum_i(x_ij) = demand_j   (demand constraints)
                        x_ij >= 0
 
     Args:
@@ -227,9 +232,37 @@ def transportation_problem(
     if dest_names is None:
         dest_names = [f"Dest_{j+1}" for j in range(n_dests)]
 
-    C = np.array(costs)
-    s = np.array(supply)
-    d = np.array(demand)
+    # Convert to numpy arrays
+    C = np.array(costs, dtype=float)
+    s = np.array(supply, dtype=float)
+    d = np.array(demand, dtype=float)
+
+    total_supply = sum(s)
+    total_demand = sum(d)
+
+    # Handle UNBALANCED problem per H&L Chapter 9
+    is_balanced = abs(total_supply - total_demand) < 1e-6
+    dummy_source = False
+    dummy_dest = False
+
+    if total_supply > total_demand:
+        # Excess supply: add dummy destination
+        dummy_dest = True
+        excess = total_supply - total_demand
+        d = np.append(d, excess)
+        # Add column of zeros to cost matrix (shipping to dummy is free)
+        C = np.hstack([C, np.zeros((n_sources, 1))])
+        dest_names = dest_names + ["Dummy_Dest (excess)"]
+        n_dests += 1
+    elif total_demand > total_supply:
+        # Excess demand: add dummy source
+        dummy_source = True
+        shortage = total_demand - total_supply
+        s = np.append(s, shortage)
+        # Add row of zeros (or high penalty) to cost matrix
+        C = np.vstack([C, np.zeros((1, n_dests))])
+        source_names = source_names + ["Dummy_Source (shortage)"]
+        n_sources += 1
 
     # Variables: x[i,j] = amount shipped from source i to dest j
     X = cp.Variable((n_sources, n_dests), name="shipments", nonneg=True)
@@ -237,25 +270,34 @@ def transportation_problem(
     # Objective: minimize total shipping cost
     objective = cp.Minimize(cp.sum(cp.multiply(C, X)))
 
-    # Constraints
+    # Constraints (equality for balanced problem)
     constraints = [
-        cp.sum(X, axis=1) <= s,  # Supply constraints
-        cp.sum(X, axis=0) >= d   # Demand constraints
+        cp.sum(X, axis=1) == s,  # Supply constraints (use all supply)
+        cp.sum(X, axis=0) == d   # Demand constraints (meet all demand)
     ]
 
     # Solve
     problem = cp.Problem(objective, constraints)
     problem.solve()
 
+    # Extract dual values (shadow prices) for sensitivity analysis
+    supply_shadow_prices = None
+    demand_shadow_prices = None
+    if problem.status == "optimal":
+        supply_shadow_prices = [float(c.dual_value) if c.dual_value is not None else None
+                               for c in constraints[0].args] if hasattr(constraints[0], 'dual_value') else None
+        demand_shadow_prices = [float(c.dual_value) if c.dual_value is not None else None
+                               for c in constraints[1].args] if hasattr(constraints[1], 'dual_value') else None
+
     # Prepare result
     shipments = X.value.tolist() if X.value is not None else None
     total_cost = problem.value
 
-    # Build shipping plan interpretation
+    # Build shipping plan interpretation (exclude dummy routes)
     shipping_plan = []
     if X.value is not None:
-        for i in range(n_sources):
-            for j in range(n_dests):
+        for i in range(len(supply)):  # Original sources only
+            for j in range(len(demand) if not dummy_dest else len(demand) - 1):  # Original dests
                 if X.value[i, j] > 0.01:
                     shipping_plan.append({
                         "from": source_names[i],
@@ -267,8 +309,12 @@ def transportation_problem(
     interpretation = {
         "shipping_plan": shipping_plan,
         "total_cost": total_cost,
-        "supply_used": [float(sum(X.value[i, :])) for i in range(n_sources)] if X.value is not None else None,
-        "demand_met": [float(sum(X.value[:, j])) for j in range(n_dests)] if X.value is not None else None
+        "supply_used": [float(sum(X.value[i, :])) for i in range(len(supply))] if X.value is not None else None,
+        "demand_met": [float(sum(X.value[:, j])) for j in range(len(demand) if not dummy_dest else len(demand)-1)] if X.value is not None else None,
+        "is_balanced": is_balanced,
+        "total_supply": total_supply,
+        "total_demand": total_demand,
+        "unbalanced_handling": "Added dummy destination" if dummy_dest else ("Added dummy source" if dummy_source else "Problem was balanced")
     }
 
     return TemplateResult(
@@ -278,6 +324,7 @@ def transportation_problem(
         solver_stats={"solver_name": problem.solver_stats.solver_name if problem.solver_stats else "unknown"},
         problem_type="linear",
         is_convex=True,
+        dual_values={"supply_shadow_prices": supply_shadow_prices, "demand_shadow_prices": demand_shadow_prices},
         interpretation=interpretation,
         message="Transportation optimized" if problem.status == "optimal" else problem.status
     )
@@ -766,4 +813,129 @@ def min_cost_flow(
         is_convex=True,
         interpretation=interpretation,
         message="Min cost flow solved" if problem.status == "optimal" else problem.status
+    )
+
+
+# =============================================================================
+# ASSIGNMENT PROBLEM (H&L Chapter 9)
+# =============================================================================
+
+def assignment_problem(
+    costs: List[List[float]],
+    worker_names: Optional[List[str]] = None,
+    task_names: Optional[List[str]] = None,
+    maximize: bool = False
+) -> TemplateResult:
+    """
+    Assignment Problem - Assign n workers to n tasks optimally (one-to-one)
+
+    Per Hillier & Lieberman Ch. 9:
+    - Special case of transportation problem with all supplies/demands = 1
+    - Handles unbalanced problems (different # of workers and tasks)
+    - LP relaxation always gives integer solution
+
+    Solves: minimize sum_i sum_j c_ij * x_ij
+            subject to: sum_j x_ij = 1  for all i (each worker assigned once)
+                       sum_i x_ij = 1  for all j (each task assigned once)
+                       x_ij >= 0
+
+    Args:
+        costs: Cost matrix [worker][task] - cost of assigning worker i to task j
+        worker_names: Optional names for workers
+        task_names: Optional names for tasks
+        maximize: If True, maximize profit instead of minimize cost
+
+    Returns:
+        TemplateResult with optimal assignment
+    """
+    C = np.array(costs, dtype=float)
+    n_workers, n_tasks = C.shape
+
+    if worker_names is None:
+        worker_names = [f"Worker_{i+1}" for i in range(n_workers)]
+    if task_names is None:
+        task_names = [f"Task_{j+1}" for j in range(n_tasks)]
+
+    # Handle UNBALANCED problem per H&L Chapter 9
+    is_balanced = n_workers == n_tasks
+    original_workers = n_workers
+    original_tasks = n_tasks
+
+    if n_workers > n_tasks:
+        # More workers than tasks: add dummy tasks
+        diff = n_workers - n_tasks
+        C = np.hstack([C, np.zeros((n_workers, diff))])
+        task_names = task_names + [f"Dummy_Task_{j+1}" for j in range(diff)]
+        n_tasks = n_workers
+    elif n_tasks > n_workers:
+        # More tasks than workers: add dummy workers
+        diff = n_tasks - n_workers
+        C = np.vstack([C, np.zeros((diff, n_tasks))])
+        worker_names = worker_names + [f"Dummy_Worker_{i+1}" for i in range(diff)]
+        n_workers = n_tasks
+
+    # For maximization, convert to minimization
+    if maximize:
+        # Convert max to min: subtract all costs from max cost
+        C_max = np.max(C)
+        C = C_max - C
+
+    # Variables: x[i,j] = 1 if worker i assigned to task j
+    # Note: LP relaxation gives integer solution for assignment problem
+    X = cp.Variable((n_workers, n_tasks), name="assignment", nonneg=True)
+
+    # Objective
+    objective = cp.Minimize(cp.sum(cp.multiply(C, X)))
+
+    # Constraints
+    constraints = [
+        cp.sum(X, axis=1) == 1,  # Each worker assigned to exactly one task
+        cp.sum(X, axis=0) == 1   # Each task assigned to exactly one worker
+    ]
+
+    # Solve
+    problem = cp.Problem(objective, constraints)
+    problem.solve()
+
+    # Prepare result
+    assignment = X.value.tolist() if X.value is not None else None
+
+    # Build assignment interpretation
+    assignments = []
+    if X.value is not None:
+        original_costs = np.array(costs, dtype=float)
+        for i in range(original_workers):
+            for j in range(original_tasks):
+                if X.value[i, j] > 0.5:  # Threshold for binary
+                    assignments.append({
+                        "worker": worker_names[i],
+                        "task": task_names[j],
+                        "cost": float(original_costs[i, j]) if not maximize else float(original_costs[i, j])
+                    })
+
+    # Calculate total cost using original cost matrix
+    total_original_cost = sum(a["cost"] for a in assignments) if assignments else None
+
+    interpretation = {
+        "assignments": assignments,
+        "total_cost": total_original_cost if not maximize else None,
+        "total_profit": total_original_cost if maximize else None,
+        "is_balanced": is_balanced,
+        "num_workers": original_workers,
+        "num_tasks": original_tasks,
+        "unassigned_workers": [worker_names[i] for i in range(original_workers)
+                              if not any(X.value[i, j] > 0.5 for j in range(original_tasks))] if X.value is not None else [],
+        "unassigned_tasks": [task_names[j] for j in range(original_tasks)
+                            if not any(X.value[i, j] > 0.5 for i in range(original_workers))] if X.value is not None else []
+    }
+
+    return TemplateResult(
+        status=problem.status,
+        optimal_value=total_original_cost,
+        variables={"assignment": assignment},
+        solver_stats={"solver_name": problem.solver_stats.solver_name if problem.solver_stats else "unknown"},
+        problem_type="linear",  # LP relaxation is tight
+        is_convex=True,
+        interpretation=interpretation,
+        message="Assignment optimized" if problem.status == "optimal" else problem.status
     )
