@@ -416,27 +416,27 @@ class ProblemValidator:
 
         # Check 2: Supply constraints
         row_sums = shipments.sum(axis=1)[:n_sources]
-        supply_satisfied = np.allclose(row_sums, supply, atol=1e-4)
+        supply_satisfied = bool(np.allclose(row_sums, supply, atol=1e-4))
         checks.append({
             'name': 'Supply constraints',
             'passed': supply_satisfied,
-            'details': f'Row sums: {list(row_sums.round(2))}, Supply: {supply}'
+            'details': f'Row sums: {[round(float(x), 2) for x in row_sums]}, Supply: {supply}'
         })
 
         # Check 3: Demand constraints
         col_sums = shipments.sum(axis=0)[:n_dests]
-        demand_satisfied = np.allclose(col_sums, demand, atol=1e-4)
+        demand_satisfied = bool(np.allclose(col_sums, demand, atol=1e-4))
         checks.append({
             'name': 'Demand constraints',
             'passed': demand_satisfied,
-            'details': f'Col sums: {list(col_sums.round(2))}, Demand: {demand}'
+            'details': f'Col sums: {[round(float(x), 2) for x in col_sums]}, Demand: {demand}'
         })
 
         # Check 4: Verify optimal value
         costs_arr = np.array(costs)
-        computed_cost = np.sum(costs_arr * shipments[:costs_arr.shape[0], :costs_arr.shape[1]])
+        computed_cost = float(np.sum(costs_arr * shipments[:costs_arr.shape[0], :costs_arr.shape[1]]))
         reported_cost = solution.get('optimal_value', 0)
-        cost_matches = abs(computed_cost - reported_cost) < 1e-4
+        cost_matches = bool(abs(computed_cost - reported_cost) < 1e-4)
         checks.append({
             'name': 'Optimal value verification',
             'passed': cost_matches,
@@ -468,6 +468,9 @@ class ProblemValidator:
 
         assignments = solution.get('variables', {}).get('assignment_matrix', [])
         if not assignments:
+            # Try alternative key name
+            assignments = solution.get('variables', {}).get('assignment', [])
+        if not assignments:
             errors.append("No assignment matrix found in solution")
             return ValidationResult(False, checks, warnings, errors, suggestions)
 
@@ -477,34 +480,34 @@ class ProblemValidator:
         is_binary = np.all((assignments < 0.01) | (assignments > 0.99))
         checks.append({
             'name': 'Integer solution',
-            'passed': is_binary,
+            'passed': bool(is_binary),
             'details': 'All assignments are 0 or 1' if is_binary else 'Fractional assignments found'
         })
 
         # Check 2: Each worker assigned exactly once
         row_sums = assignments.sum(axis=1)
-        worker_constraint = np.allclose(row_sums, 1, atol=0.01)
+        worker_constraint = bool(np.allclose(row_sums, 1, atol=0.01))
         checks.append({
             'name': 'Worker constraints',
             'passed': worker_constraint,
-            'details': f'Row sums: {list(row_sums.round(2))} (should be 1)'
+            'details': f'Row sums: {[round(float(x), 2) for x in row_sums]} (should be 1)'
         })
 
         # Check 3: Each task assigned exactly once
         col_sums = assignments.sum(axis=0)
-        task_constraint = np.allclose(col_sums, 1, atol=0.01)
+        task_constraint = bool(np.allclose(col_sums, 1, atol=0.01))
         checks.append({
             'name': 'Task constraints',
             'passed': task_constraint,
-            'details': f'Col sums: {list(col_sums.round(2))} (should be 1)'
+            'details': f'Col sums: {[round(float(x), 2) for x in col_sums]} (should be 1)'
         })
 
         # Check 4: Verify optimal value
         costs_arr = np.array(costs)
         if assignments.shape == costs_arr.shape:
-            computed_value = np.sum(costs_arr * assignments)
+            computed_value = float(np.sum(costs_arr * assignments))
             reported_value = solution.get('optimal_value', 0)
-            value_matches = abs(computed_value - abs(reported_value)) < 1e-4
+            value_matches = bool(abs(computed_value - abs(reported_value)) < 1e-4)
             checks.append({
                 'name': 'Optimal value verification',
                 'passed': value_matches,
@@ -545,8 +548,8 @@ class ProblemValidator:
         cov = np.array(covariance_matrix)
 
         # Check 1: Weights sum to 1
-        weight_sum = weights.sum()
-        sum_valid = abs(weight_sum - 1.0) < 0.01
+        weight_sum = float(weights.sum())
+        sum_valid = bool(abs(weight_sum - 1.0) < 0.01)
         checks.append({
             'name': 'Budget constraint',
             'passed': sum_valid,
@@ -554,7 +557,7 @@ class ProblemValidator:
         })
 
         # Check 2: No negative weights (long-only)
-        no_negative = np.all(weights >= -0.001)
+        no_negative = bool(np.all(weights >= -0.001))
         checks.append({
             'name': 'No short selling',
             'passed': no_negative,
@@ -562,9 +565,9 @@ class ProblemValidator:
         })
 
         # Compute portfolio metrics
-        portfolio_return = np.dot(weights, returns)
-        portfolio_variance = np.dot(weights, np.dot(cov, weights))
-        portfolio_risk = np.sqrt(portfolio_variance)
+        portfolio_return = float(np.dot(weights, returns))
+        portfolio_variance = float(np.dot(weights, np.dot(cov, weights)))
+        portfolio_risk = float(np.sqrt(portfolio_variance))
 
         checks.append({
             'name': 'Portfolio metrics',
