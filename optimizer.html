@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONVEX OPTIMIZER 2000 - The Ultimate Optimization Solution!</title>
+    <link rel="stylesheet" href="optimizer.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with retro styling -->
+        <header>
+            <div class="title-banner">
+                <h1 onclick="flashColors(this)">
+                    <span class="star">*</span>
+                    CONVEX OPTIMIZER 2000
+                    <span class="star">*</span>
+                </h1>
+                <div class="subtitle">~ Powered by CVXPY ~</div>
+            </div>
+
+            <div class="under-construction">
+                <img src="https://web.archive.org/web/20091027005903/http://www.geocities.com/hk/Horizons/1121/const_an.gif" alt="Under Construction">
+                <span class="blink">NOW WITH MORE SOLVERS!</span>
+            </div>
+
+            <marquee scrollamount="2" behavior="alternate" class="info-marquee">
+                *** LINEAR PROGRAMMING *** QUADRATIC PROGRAMMING *** SOCP *** SDP *** MIXED INTEGER *** CONVEX OPTIMIZATION MADE EASY! ***
+            </marquee>
+        </header>
+
+        <!-- Navigation -->
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#" class="active">Optimizer</a></li>
+                <li><a href="#templates">Templates</a></li>
+                <li><a href="#custom">Custom Problem</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Problem Type Selection -->
+            <section class="panel" id="templates">
+                <div class="panel-header">
+                    <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/arrow.gif" alt="arrow">
+                    SELECT YOUR OPTIMIZATION PROBLEM
+                    <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/arrow.gif" alt="arrow">
+                </div>
+
+                <div class="template-grid">
+                    <div class="template-card" onclick="selectTemplate('portfolio')">
+                        <div class="template-icon">$</div>
+                        <div class="template-name">Portfolio Optimization</div>
+                        <div class="template-type">Quadratic Programming</div>
+                        <div class="template-desc">Markowitz mean-variance optimization</div>
+                    </div>
+
+                    <div class="template-card" onclick="selectTemplate('diet')">
+                        <div class="template-icon">@</div>
+                        <div class="template-name">Diet Problem</div>
+                        <div class="template-type">Linear Programming</div>
+                        <div class="template-desc">Minimize cost, meet nutrition needs</div>
+                    </div>
+
+                    <div class="template-card" onclick="selectTemplate('transportation')">
+                        <div class="template-icon">#</div>
+                        <div class="template-name">Transportation</div>
+                        <div class="template-type">Linear Programming</div>
+                        <div class="template-desc">Minimize shipping costs</div>
+                    </div>
+
+                    <div class="template-card" onclick="selectTemplate('resource_allocation')">
+                        <div class="template-icon">%</div>
+                        <div class="template-name">Resource Allocation</div>
+                        <div class="template-type">Linear Programming</div>
+                        <div class="template-desc">Maximize profit with limited resources</div>
+                    </div>
+
+                    <div class="template-card" onclick="selectTemplate('regression')">
+                        <div class="template-icon">^</div>
+                        <div class="template-name">Regression</div>
+                        <div class="template-type">QP / SOCP</div>
+                        <div class="template-desc">Ridge, LASSO, Elastic Net</div>
+                    </div>
+
+                    <div class="template-card" onclick="selectTemplate('knapsack')">
+                        <div class="template-icon">&</div>
+                        <div class="template-name">Knapsack</div>
+                        <div class="template-type">Mixed Integer LP</div>
+                        <div class="template-desc">Select items within capacity</div>
+                    </div>
+
+                    <div class="template-card" onclick="selectTemplate('simple_lp')">
+                        <div class="template-icon">+</div>
+                        <div class="template-name">Simple 2D LP</div>
+                        <div class="template-type">Linear Programming</div>
+                        <div class="template-desc">Basic LP visualization</div>
+                    </div>
+
+                    <div class="template-card" onclick="selectTemplate('min_cost_flow')">
+                        <div class="template-icon">~</div>
+                        <div class="template-name">Min Cost Flow</div>
+                        <div class="template-type">Network LP</div>
+                        <div class="template-desc">Optimize network flows</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Problem Input Area -->
+            <section class="panel" id="problem-input">
+                <div class="panel-header">
+                    <span class="blink">></span>
+                    PROBLEM CONFIGURATION
+                    <span class="blink"><</span>
+                </div>
+
+                <div id="input-area">
+                    <div class="placeholder-text">
+                        <pre>
+   _____      _           _     _____           _     _
+  / ____|    | |         | |   |  __ \         | |   | |
+ | (___   ___| | ___  ___| |_  | |__) | __ ___ | |__ | | ___ _ __ ___
+  \___ \ / _ \ |/ _ \/ __| __| |  ___/ '__/ _ \| '_ \| |/ _ \ '_ ` _ \
+  ____) |  __/ |  __/ (__| |_  | |   | | | (_) | |_) | |  __/ | | | | |
+ |_____/ \___|_|\___|\___|\__| |_|   |_|  \___/|_.__/|_|\___|_| |_| |_|
+                        </pre>
+                        <p>Click on a template above to get started!</p>
+                        <p>Or scroll down to build a custom problem.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Solve Button -->
+            <section class="button-section">
+                <button id="solve-btn" class="solve-button" onclick="solveProblem()" disabled>
+                    <span class="button-inner">
+                        [ SOLVE OPTIMIZATION ]
+                    </span>
+                </button>
+                <button id="load-example-btn" class="example-button" onclick="loadExample()" disabled>
+                    Load Example Data
+                </button>
+                <button class="clear-button" onclick="clearAll()">
+                    Clear All
+                </button>
+            </section>
+
+            <!-- Results Area -->
+            <section class="panel" id="results">
+                <div class="panel-header">
+                    <span class="star">*</span>
+                    OPTIMIZATION RESULTS
+                    <span class="star">*</span>
+                </div>
+
+                <div id="results-area">
+                    <div class="waiting-text">
+                        <pre>
++------------------------------------------+
+|                                          |
+|     Waiting for optimization...          |
+|                                          |
+|     Status: IDLE                         |
+|                                          |
++------------------------------------------+
+                        </pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Custom Problem Builder -->
+            <section class="panel" id="custom">
+                <div class="panel-header">
+                    <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/new.gif" alt="NEW!">
+                    CUSTOM PROBLEM BUILDER
+                    <img src="https://web.archive.org/web/20091027034225/http://www.geocities.com/Hollywood/Hills/8521/images/new.gif" alt="NEW!">
+                </div>
+
+                <div class="custom-builder">
+                    <div class="builder-section">
+                        <h3>Objective</h3>
+                        <div class="form-row">
+                            <label>Type:</label>
+                            <select id="custom-obj-type">
+                                <option value="minimize">Minimize</option>
+                                <option value="maximize">Maximize</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Expression:</label>
+                            <input type="text" id="custom-objective" placeholder="e.g., 3*x + 2*y + z^2">
+                        </div>
+                    </div>
+
+                    <div class="builder-section">
+                        <h3>Variables</h3>
+                        <div id="variables-list">
+                            <div class="variable-row">
+                                <input type="text" placeholder="Name" class="var-name" value="x">
+                                <select class="var-type">
+                                    <option value="continuous">Continuous</option>
+                                    <option value="integer">Integer</option>
+                                    <option value="binary">Binary</option>
+                                </select>
+                                <input type="number" placeholder="Size" class="var-size" value="1">
+                                <label><input type="checkbox" class="var-nonneg"> >= 0</label>
+                            </div>
+                        </div>
+                        <button class="add-button" onclick="addVariable()">+ Add Variable</button>
+                    </div>
+
+                    <div class="builder-section">
+                        <h3>Constraints</h3>
+                        <div id="constraints-list">
+                            <div class="constraint-row">
+                                <input type="text" placeholder="LHS expression" class="const-lhs" value="x + y">
+                                <select class="const-type">
+                                    <option value="<="><=</option>
+                                    <option value=">=">>=</option>
+                                    <option value="==">=</option>
+                                </select>
+                                <input type="text" placeholder="RHS" class="const-rhs" value="10">
+                                <button class="remove-btn" onclick="removeConstraint(this)">X</button>
+                            </div>
+                        </div>
+                        <button class="add-button" onclick="addConstraint()">+ Add Constraint</button>
+                    </div>
+
+                    <button class="solve-button custom-solve" onclick="solveCustomProblem()">
+                        [ SOLVE CUSTOM PROBLEM ]
+                    </button>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section class="panel" id="about">
+                <div class="panel-header">
+                    <span class="star">?</span>
+                    ABOUT CONVEX OPTIMIZER 2000
+                    <span class="star">?</span>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-box">
+                        <h3>What is Convex Optimization?</h3>
+                        <p>Convex optimization is a special class of mathematical optimization where both the objective function and the feasible set are convex. This guarantees that any local minimum is also a global minimum!</p>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Supported Problem Types</h3>
+                        <ul>
+                            <li><b>LP</b> - Linear Programming</li>
+                            <li><b>QP</b> - Quadratic Programming</li>
+                            <li><b>SOCP</b> - Second-Order Cone Programming</li>
+                            <li><b>SDP</b> - Semidefinite Programming</li>
+                            <li><b>GP</b> - Geometric Programming</li>
+                            <li><b>MILP</b> - Mixed Integer Linear Programming</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-box">
+                        <h3>Powered By</h3>
+                        <ul>
+                            <li><b>CVXPY</b> - Disciplined Convex Programming</li>
+                            <li><b>ECOS</b> - Embedded Conic Solver</li>
+                            <li><b>OSQP</b> - Operator Splitting QP Solver</li>
+                            <li><b>SCS</b> - Splitting Conic Solver</li>
+                            <li><b>CLARABEL</b> - Interior Point Solver</li>
+                        </ul>
+                    </div>
+
+                    <div class="math-formulas">
+                        <h3>Standard Form</h3>
+                        <pre>
+minimize    f(x)
+subject to  g_i(x) <= 0,  i = 1,...,m
+            h_j(x) = 0,   j = 1,...,p
+
+where f and g_i are convex functions
+and h_j are affine functions
+                        </pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-content">
+                <p>Convex Optimizer 2000 - Making Optimization Cool Since Y2K!</p>
+                <div class="badges">
+                    <span class="badge">CVXPY Powered</span>
+                    <span class="badge">Python 3</span>
+                    <span class="badge">Flask API</span>
+                </div>
+                <p class="copyright">Created with nostalgia for the early web era</p>
+            </div>
+            <div class="hit-counter">
+                Problems Solved: <span id="solve-counter">00000</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loading-modal" class="modal">
+        <div class="modal-content">
+            <div class="loading-animation">
+                <pre id="loading-text">
+   _____ _______      _______ _   _  _____
+  / ____/ __ \ \    / /_   _| \ | |/ ____|
+ | (___| |  | \ \  / /  | | |  \| | |  __
+  \___ \ |  | |\ \/ /   | | | . ` | | |_ |
+  ____) | |__| | \  /   _| |_| |\  | |__| |
+ |_____/\____/   \/   |_____|_| \_|\_____|
+
+            SOLVING...
+                </pre>
+            </div>
+            <div class="loading-spinner">
+                <span class="spinner-char">/</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="optimizer.js"></script>
+</body>
+</html>
